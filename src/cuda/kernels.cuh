@@ -5,14 +5,18 @@
 #ifndef PROBLEM764_KERNELS_CUH
 #define PROBLEM764_KERNELS_CUH
 
-__device__ bool is_perfect_square_cuda(uint64_t n, uint64_t sqrt_n) {
+__device__ inline bool is_perfect_square_cuda(uint64_t n, uint64_t sqrt_n) {
     return n == sqrt_n * sqrt_n;
 }
 
 __device__ uint64_t gcd_cuda(uint64_t a, uint64_t b) {
-    if (b == 0)
-        return a;
-    return gcd_cuda(b, a % b);
+    uint64_t aux;
+    while (b > 0) {
+        aux = a;
+        a = b;
+        b = aux % b;
+    }
+    return a;
 }
 
 // Single loop

@@ -13,12 +13,12 @@ uint64_t uint64_pow(uint64_t base, uint64_t exp) {
     return value;
 }
 
-bool is_perfect_square(uint64_t n, uint64_t sqrt_n) {
-    return n == sqrt_n * sqrt_n;
-}
-
 uint64_t gcd(uint64_t a, uint64_t b) {
-    if (b == 0)
-        return a;
-    return gcd(b, a % b);
+    uint64_t aux;
+    while (b > 0) {
+        aux = a;
+        a = b;
+        b = aux % b;
+    }
+    return a;
 }
