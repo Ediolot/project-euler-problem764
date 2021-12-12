@@ -53,6 +53,7 @@ void a() {
 }
 
 void calculate764(uint64_t big_n) {
+    // TODO might have problems with precision of sqrt and when adding big numbers
     Result result("CPU", big_n);
 
     uint64_t n_elems = 0;
