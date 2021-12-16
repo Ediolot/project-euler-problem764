@@ -87,8 +87,8 @@ void cuda_v2(const uint64_t blocks, const uint64_t threads_per_block, const uint
     Result result("CUDA 2 LOOP 1 opti", big_n);
     uint64_t sum_xyz = 0;
 
-    result.cuda_tic("Kernel (A) Launch", blocks * threads_per_block / 2);
-    kernel3<<<blocks, threads_per_block / 2>>>(outputs.get_device(), big_n);
+    result.cuda_tic("Kernel (A) Launch", blocks * ceil_div(threads_per_block, 2));
+    kernel3<<<blocks, ceil_div(threads_per_block, 2)>>>(outputs.get_device(), big_n);
     result.cuda_toc();
 
     result.cuda_tic("CPU -> GPU copy");
@@ -120,8 +120,8 @@ void cuda_v3(const uint64_t blocks, const uint64_t threads_per_block, const uint
     Result result("CUDA 2 LOOP 2 opti", big_n);
     uint64_t sum_xyz = 0;
 
-    result.cuda_tic("Kernel (A) Launch", blocks * threads_per_block / 2);
-    kernel3<<<blocks, threads_per_block / 2>>>(outputs.get_device(), big_n);
+    result.cuda_tic("Kernel (A) Launch", blocks * ceil_div(threads_per_block, 2));
+    kernel3<<<blocks, ceil_div(threads_per_block, 2)>>>(outputs.get_device(), big_n);
     result.cuda_toc();
 
     result.cuda_tic("CPU -> GPU copy");
