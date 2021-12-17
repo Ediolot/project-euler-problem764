@@ -44,6 +44,7 @@ __global__ void kernel0(uint64_t* __restrict__ outputs, uint64_t big_n) {
             uint64_t x = a / 4;
             if (gcd_cuda(x, y) == 1) {
                 sum_xyz += (x % 1000000000UL) + (y % 1000000000UL) + (c % 1000000000UL);
+//                printf("(0) x=%ld, y=%ld, z=%ld, m=%ld, n=%ld\n", x, y, c, m, n);
 //                printf("A) %ld %ld %ld m=%ld n=%ld\n", x, y, c, m, n);
             }
         }
@@ -215,9 +216,13 @@ __global__ void kernel5(uint64_t* __restrict__ outputs, uint64_t big_n) {
     for (uint64_t b = 1; b < b_max; b += 2) { // B is odd
         uint64_t n = b * b;
         uint64_t n2 = n * n;
-        uint64_t cc = 4 * (m2 + +n2);
+        uint64_t cc = 4 * (m2 + n2);
 
         if (cc > big_n) {
+            continue;
+        }
+        // TODO maxb = sqrt(2) * a
+        if (n2 > m2) {
             continue;
         }
 
@@ -229,6 +234,7 @@ __global__ void kernel5(uint64_t* __restrict__ outputs, uint64_t big_n) {
             uint64_t x = aa / 4;
             if ((16UL * x *  x + y * y * y * y - cc * cc) == 0 && gcd_cuda(x, y) == 1) {
                 sum_xyz += (x % 1000000000UL) + (y % 1000000000UL) + (cc % 1000000000UL);
+//                printf("(5) x=%ld, y=%ld, z=%ld, m=%ld, n=%ld, a=%ld, b=%ld\n", x, y, cc, m, n, a, b);
 //                printf("m=%ld, n=%ld optimx2 a=%ld, b=%ld cc=%ld cc>bign=%d i\n", m, n, a, b, cc, cc > big_n);
 //                sum_xyz += x + y + c;
 //                printf("A) %ld %ld %ld\n", x, y, c);
@@ -236,6 +242,7 @@ __global__ void kernel5(uint64_t* __restrict__ outputs, uint64_t big_n) {
         }
     }
 
+//    printf("(5) Writting %ld @ %d\n", sum_xyz, a);
     outputs[a] = sum_xyz;
 }
 
@@ -250,10 +257,11 @@ __global__ void kernel6(uint64_t* __restrict__ outputs, uint64_t big_n) {
     uint64_t b_max = a;
 
     if (a % 2 != 1) {
+        outputs[a] = 0;
         return;
     }
 
-    for (uint64_t b = 2; b < b_max; ++b) {
+    for (uint64_t b = 1; b < b_max; ++b) {
         uint64_t n = 2 * b * b;
         uint64_t n2 = n * n;
         uint64_t cc = 4 * (m2 + +n2);
@@ -261,22 +269,25 @@ __global__ void kernel6(uint64_t* __restrict__ outputs, uint64_t big_n) {
         if (cc > big_n) {
             break;
         }
+        // TODO maxb = a / sqrt(2)
+        if (n2 > m2) {
+            continue;
+        }
 
         uint64_t aa = 4 * (m2 - n2);
         uint64_t bb = 8 * m * n;
 
-        auto y = (uint64_t) sqrt((double)bb);
-        if (!(aa % 4) && is_perfect_square_cuda(b, y)) {
+        uint64_t y = (uint64_t) sqrt((double)bb);
+        if (!(aa % 4) && is_perfect_square_cuda(bb, y)) {
             uint64_t x = aa / 4;
             if (gcd_cuda(x, y) == 1) {
                 sum_xyz += (x % 1000000000UL) + (y % 1000000000UL) + (cc % 1000000000UL);
-//                printf("m=%ld, n=%ld optimx2 ii\n", m, n);
-//                sum_xyz += x + y + c;
-//                printf("A) %ld %ld %ld\n", x, y, c);
+//                printf("(6) x=%ld, y=%ld, z=%ld, m=%ld, n=%ld, a=%ld, b=%ld\n", x, y, cc, m, n, a, b);
             }
         }
     }
 
+//    printf("(6) Writting %ld @ %d\n", sum_xyz, a);
     outputs[a] = sum_xyz;
 }
 

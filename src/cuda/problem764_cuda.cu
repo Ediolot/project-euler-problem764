@@ -160,13 +160,12 @@ void cuda_v4(const uint64_t blocks, const uint64_t threads_per_block, const uint
     const uint64_t a_blocks = calculate_number_blocks(a_max);
     const uint64_t a_threads_per_block = ceil_div(a_max, a_blocks);
 
-    printf("%ld\n", a_max);
     CudaVector<uint64_t> outputs(a_blocks * a_threads_per_block, true);
     Result result("CUDA 2 LOOP 2 opti v2", big_n);
     uint64_t sum_xyz = 0;
 
     // When m is even
-    result.cuda_tic("Kernel (A) Launch", a_blocks * a_threads_per_block);
+    result.cuda_tic("Kernel (A.i) Launch", a_blocks * a_threads_per_block);
     kernel5<<<a_blocks, a_threads_per_block>>>(outputs.get_device(), big_n);
     result.cuda_toc();
 
@@ -179,7 +178,7 @@ void cuda_v4(const uint64_t blocks, const uint64_t threads_per_block, const uint
     result.toc();
 
     // When m is odd
-    result.cuda_tic("Kernel (A) Launch", a_blocks * a_threads_per_block);
+    result.cuda_tic("Kernel (A.ii) Launch", a_blocks * a_threads_per_block);
     kernel6<<<a_blocks, a_threads_per_block>>>(outputs.get_device(), big_n);
     result.cuda_toc();
 
@@ -191,23 +190,23 @@ void cuda_v4(const uint64_t blocks, const uint64_t threads_per_block, const uint
     sum_xyz += outputs.accumulate_host_mod9();
     result.toc();
 
-//    // Calculate blocks and threads for r and v
-//    const auto r_max = uint64_t(std::sqrt(m_max) + 1);
-//    const uint64_t r_blocks = calculate_number_blocks(r_max);
-//    const uint64_t r_threads_per_block = ceil_div(r_max, r_blocks);
-//    CudaVector<uint64_t> r_outputs(r_blocks * r_threads_per_block, true);
-//
-//    result.cuda_tic("Kernel (B) Launch", r_blocks * r_threads_per_block);
-//    kernel4<<<r_blocks, r_threads_per_block>>>(r_outputs.get_device(), big_n, r_max, m_max);
-//    result.cuda_toc();
-//
-//    result.cuda_tic("CPU -> GPU copy");
-//    r_outputs.device_to_host();
-//    result.cuda_toc();
-//
-//    result.tic("Accumulate");
-//    sum_xyz += r_outputs.accumulate_host_mod9();
-//    result.toc();
+    // Calculate blocks and threads for r and v
+    const auto r_max = uint64_t(std::sqrt(m_max) + 1);
+    const uint64_t r_blocks = calculate_number_blocks(r_max);
+    const uint64_t r_threads_per_block = ceil_div(r_max, r_blocks);
+    CudaVector<uint64_t> r_outputs(r_blocks * r_threads_per_block, true);
+
+    result.cuda_tic("Kernel (B) Launch", r_blocks * r_threads_per_block);
+    kernel4<<<r_blocks, r_threads_per_block>>>(r_outputs.get_device(), big_n, r_max, m_max);
+    result.cuda_toc();
+
+    result.cuda_tic("CPU -> GPU copy");
+    r_outputs.device_to_host();
+    result.cuda_toc();
+
+    result.tic("Accumulate");
+    sum_xyz += r_outputs.accumulate_host_mod9();
+    result.toc();
 
     result.set_sum_xyz(sum_xyz);
     result.print();
@@ -224,15 +223,15 @@ void calculate764_cuda(const uint64_t big_n) {
     printf(" * Blocks := %ld\n * Threads per block := %ld\n", threads_per_block, blocks);
     printf(" * Requires %.5f GB of VRAM\n", (double)(sizeof(uint64_t) * total_threads) / 1024 / 1024 / 1024);
 
-    printf("\n");
-    cuda_v0(blocks, threads_per_block, big_n);
-    printf("\n");
-    cuda_v1(blocks, threads_per_block, big_n);
-    printf("\n");
-    cuda_v2(blocks, threads_per_block, big_n, m_max);
-    printf("\n");
-    cuda_v3(blocks, threads_per_block, big_n, m_max);
-    printf("\n");
+//    printf("\n");
+//    cuda_v0(blocks, threads_per_block, big_n);
+//    printf("\n");
+//    cuda_v1(blocks, threads_per_block, big_n);
+//    printf("\n");
+//    cuda_v2(blocks, threads_per_block, big_n, m_max);
+//    printf("\n");
+//    cuda_v3(blocks, threads_per_block, big_n, m_max);
+//    printf("\n");
     cuda_v4(blocks, threads_per_block, big_n, m_max);
     printf("\n");
 }
